@@ -1,0 +1,4 @@
+.venv/
+NYUv2/
+nyu_depth_v2_labeled.mat
+nyuv2_surfacenormal_metadata.zip
