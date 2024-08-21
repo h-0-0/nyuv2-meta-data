@@ -130,7 +130,7 @@ def is_image_file(filename):
     image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff']
     return any(filename.lower().endswith(ext) for ext in image_extensions)
 
-def create_tar_from_images(directory, output_filename):
+def create_tar_from_images(directory, output_filename, num_classes):
     # Open a tarfile for writing
     with tarfile.open(output_filename, "w:gz") as tar:
         # Iterate over all files in the directory
@@ -139,7 +139,7 @@ def create_tar_from_images(directory, output_filename):
             # Check if the file is an image
             if os.path.isfile(filepath) and is_image_file(filename):
                 # Add the file to the tar archive without the parent directory
-                tar.add(filepath, arcname=filename)
+                tar.add(filepath, arcname=f"new_nyu_class{num_classes}_{filename}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='RYU DATA Extraction')
@@ -196,5 +196,5 @@ if __name__ == '__main__':
         os.makedirs('train_labels_40')
     if not os.path.exists('test_labels_40'):
         os.makedirs('test_labels_40')
-    create_tar_from_images('NYUv2/seg40/train', 'train_labels_40/nyuv2_train_class40.tgz')
-    create_tar_from_images('NYUv2/seg40/test', 'test_labels_40/nyuv2_test_class40.tgz')
+    create_tar_from_images('NYUv2/seg40/train', 'train_labels_40/nyuv2_train_class40.tgz', 40)
+    create_tar_from_images('NYUv2/seg40/test', 'test_labels_40/nyuv2_test_class40.tgz', 40)
