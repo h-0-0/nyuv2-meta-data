@@ -139,6 +139,8 @@ def create_tar_from_images(directory, output_filename, num_classes):
             # Check if the file is an image
             if os.path.isfile(filepath) and is_image_file(filename):
                 # Add the file to the tar archive without the parent directory
+                if len(filename) > len("0000.png"):
+                    filename = filename[1:]
                 tar.add(filepath, arcname=f"new_nyu_class{num_classes}_{filename}")
 
 if __name__ == '__main__':
