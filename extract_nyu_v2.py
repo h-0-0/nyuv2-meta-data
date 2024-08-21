@@ -121,9 +121,25 @@ def extract_depths(depths, splits, DEPTH_DIR, save_colored=False):
                 colored = plt.cm.jet(norm(depth))
                 plt.imsave('colored_depth/%05d.png' % (idx), colored)
 
-def create_tgz(source_dir, output_filename):
+# def create_tgz(source_dir, output_filename):
+#     with tarfile.open(output_filename, "w:gz") as tar:
+#         tar.add(source_dir, arcname=os.path.basename(source_dir))
+
+def is_image_file(filename):
+    # Define common image file extensions
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff']
+    return any(filename.lower().endswith(ext) for ext in image_extensions)
+
+def create_tar_from_images(directory, output_filename):
+    # Open a tarfile for writing
     with tarfile.open(output_filename, "w:gz") as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
+        # Iterate over all files in the directory
+        for filename in os.listdir(directory):
+            filepath = os.path.join(directory, filename)
+            # Check if the file is an image
+            if os.path.isfile(filepath) and is_image_file(filename):
+                # Add the file to the tar archive without the parent directory
+                tar.add(filepath, arcname=filename)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='RYU DATA Extraction')
@@ -157,28 +173,28 @@ if __name__ == '__main__':
     os.makedirs(SEG13_DIR, exist_ok=True)
     os.makedirs(DEPTH_DIR, exist_ok=True)
     import time
-    with h5py.File(MAT_FILE, 'r') as fr:
-        images = fr["images"]
-        labels = fr["labels"]
-        depths = fr["depths"]
+    # with h5py.File(MAT_FILE, 'r') as fr:
+    #     images = fr["images"]
+    #     labels = fr["labels"]
+    #     depths = fr["depths"]
 
-        extract_labels(np.array(labels), splits, SEG40_DIR, SEG13_DIR, save_colored=args.save_colored )
-        extract_depths(np.array(depths), splits, DEPTH_DIR, save_colored=args.save_colored)
-        extract_images(np.array(images), splits, IMAGE_DIR)
+    #     extract_labels(np.array(labels), splits, SEG40_DIR, SEG13_DIR, save_colored=args.save_colored )
+    #     extract_depths(np.array(depths), splits, DEPTH_DIR, save_colored=args.save_colored)
+    #     extract_images(np.array(images), splits, IMAGE_DIR)
 
-        if args.normal_zip is not None and os.path.exists(args.normal_zip):
-            NORMAL_DIR = os.path.join(DATA_ROOT, 'normal')
-            os.makedirs(NORMAL_DIR, exist_ok=True)
-            with zipfile.ZipFile(args.normal_zip, 'r') as normal_zip:
-                normal_zip.extractall(path=NORMAL_DIR)
+    #     if args.normal_zip is not None and os.path.exists(args.normal_zip):
+    #         NORMAL_DIR = os.path.join(DATA_ROOT, 'normal')
+    #         os.makedirs(NORMAL_DIR, exist_ok=True)
+    #         with zipfile.ZipFile(args.normal_zip, 'r') as normal_zip:
+    #             normal_zip.extractall(path=NORMAL_DIR)
         
-        if not os.path.exists(os.path.join( DATA_ROOT, 'splits.mat' )):
-            shutil.copy2( 'splits.mat', os.path.join( DATA_ROOT, 'splits.mat' ))
+    #     if not os.path.exists(os.path.join( DATA_ROOT, 'splits.mat' )):
+    #         shutil.copy2( 'splits.mat', os.path.join( DATA_ROOT, 'splits.mat' ))
     
     # Create a tgz file
     if not os.path.exists('train_labels_40'):
         os.makedirs('train_labels_40')
     if not os.path.exists('test_labels_40'):
         os.makedirs('test_labels_40')
-    create_tgz('NYUv2/seg40/train', 'train_labels_40/nyuv2_train_class40.tgz')
-    create_tgz('NYUv2/seg40/test', 'test_labels_40/nyuv2_test_class40.tgz')
+    create_tar_from_images('NYUv2/seg40/train', 'train_labels_40/nyuv2_train_class40.tgz')
+    create_tar_from_images('NYUv2/seg40/test', 'test_labels_40/nyuv2_test_class40.tgz')
