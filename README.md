@@ -1,28 +1,26 @@
-## What does this repository contain?
+# NYUv2 
+This repo has a bunch of different tools and data to help you get benchmarking on NYUv2 quickly. It includes a script to download and extract data, extracted segmentation labels and a pytorch dataset class. 
 
-This repository contains 13 class labels for both train and test dataset in NYUv2. This is to avoid any hassle involved in parsing the data from the .mat files. If you are looking to train a network to do 13 class segmentation from RGB data, then this repository can provide you both the training/test dataset as well the corresponding ground truth labels. However, if your networks needs additionally depth data (either depth image or DHA features) then you will need to download the dataset from the [NYUv2 website](http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/nyu_depth_v2_labeled.mat) (~2.8GB) as well as the corresponding [toolbox](http://cs.nyu.edu/~silberman/code/toolbox_nyu_depth_v2.zip). To summarise, this repository contains the following
+Note that this repo only concerns itself with the fully labelled portion of the dataset. For the larger unlabelled version I would recommend checking out the tensorflow dataloader (https://www.tensorflow.org/datasets/catalog/nyu_depth_v2). 
 
-- The **train_labels_13** contains the ground truth annotation for 13 classes for NYUv2 training dataset while **test_labels_13** contains the ground truth for test dataset in NYUv2.
+## Downloading, extracting and pre-extracted data
+This repository contains everything needed to download and extract data for the NYUv2 dataset in python. Using 'extract_nyu_v2.py' you can download and extract samples consisting of:
+- RGB images
+- Depth images
+- Surface normals
+- 13 class segmentation labels
+- 40 class segmentation labels
+The surface normals are downloaded from [here](https://dl.fbaipublicfiles.com/fair_self_supervision_benchmark/nyuv2_surfacenormal_metadata.zip) and everything else from [here](https://cs.nyu.edu/~fergus/datasets/nyu_depth_v2.html)
+Additionally, you can avoid doing anything and simply download and use the pre-extracted segmentation labels found in:
+- test_labels_13
+- train_labels_13
+- test_labels_40
+- train_labels_40
 
-- The training dataset (795 RGB images) can be obtained from [nyu_train_rgb](http://www.doc.ic.ac.uk/~ahanda/nyu_train_rgb.tgz) (277MB) while the test dataset (654 RGB images) can be obtained from [nyu_test_rgb](http://www.doc.ic.ac.uk/~ahanda/nyu_test_rgb.tgz) (227MB).
+## Pytorch
+This repo also provides a script for a pytorch dataset class which lets you get up and running with the NYUv2 dataset very quickly ([Adapted from here](https://github.com/xapharius/pytorch-nyuv2)). Simply copy the code in 'torch_nyuv2.py', initialize the dataset using the class, give it to a dataloader and off you go!
 
-- Important to remember that the label files are ordered but the rgb files are not. Though you can order the files using ``gprename``.
+## Thanks for checking out the repo
+If you find this repo useful please consider giving it a star, so it can be more easily found by others. Also please feel free to propose changes and fixes or ask questions by creating an issue, include a @h-0-0 so that I'm notified. 
 
-## How do I obtain the DHA features?
-
-Look for this in a corresponding [SUN RGB-D meta data repository](https://github.com/ankurhanda/sunrgbd-meta-data). You will need rotation matrices for each training and test image. They are available here at [**camera_rotations_NYU.txt**](https://github.com/ankurhanda/nyuv2-meta-data/blob/master/camera_rotations_NYU.txt). These matrices are used to align the floor normal vector to the canonical gravity vector. There are 1449 rotation matrices in total and the indices for these matrices corresponding to training and test data are in **splits.mat**. Remember that labels are ordered *i.e.* training labels files are named with indices 1 to 795 and similarly for test dataset. 
-
-## How do I benchmark? 
-[getAccuracyNYU.m](https://github.com/ankurhanda/SceneNetv1.0/blob/master/getAccuracyNYU.m) available in the [SceneNetv1.0](https://github.com/ankurhanda/SceneNetv1.0/) repository allows you to obtain the avereage global and class accuracies. 
-
-## What are the classes and where is the mapping form the class number to the class name?
-
-The mapping is also available at [SceneNetv1.0](https://github.com/ankurhanda/SceneNetv1.0/) repository.
-
-
-
-
-
-
-
-
+Finally, thank you very much to [ankurhanda](https://github.com/ankurhanda), [VainF](https://github.com/VainF) and [xapharius](https://github.com/xapharius) who's code I amalgamated to create this repo. 

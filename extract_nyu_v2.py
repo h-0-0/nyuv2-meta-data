@@ -1,4 +1,5 @@
 # Adapted from: https://github.com/VainF/nyuv2-python-toolkit/tree/master
+# With permission from the author
 
 import os
 import h5py
@@ -14,6 +15,9 @@ import wget
 import tarfile
 
 def download_nyu_v2():
+    """
+    Download official NYUv2 dataset and surface normal dataset.
+    """
     if not os.path.exists('nyu_depth_v2_labeled.mat'):
         print("Downloading NYUv2 dataset...")
         wget.download("http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/nyu_depth_v2_labeled.mat")
@@ -23,6 +27,9 @@ def download_nyu_v2():
         
 
 def colormap(N=256, normalized=False):
+    """
+    Create a colormap for visualizing segmentation labels.
+    """
     def bitget(byteval, idx):
         return ((byteval & (1 << idx)) != 0)
 
@@ -44,6 +51,9 @@ def colormap(N=256, normalized=False):
 
 
 def extract_images(imgs, splits, IMAGE_DIR):
+    """
+    Extract images from the dataset.
+    """
     print("Extracting images...")
     imgs = imgs.transpose(0, 3, 2, 1)
     for s in ['train', 'test']:
@@ -56,6 +66,9 @@ def extract_images(imgs, splits, IMAGE_DIR):
 
 
 def extract_labels(labels, splits, SEG40_DIR, SEG13_DIR, save_colored=True):
+    """
+    Extract labels from the dataset.
+    """
     mapping40 = loadmat('classMapping40.mat')['mapClass'][0]
     mapping13 = loadmat('class13Mapping.mat')['classMapping13'][0][0][0][0]
     mapping40 = np.insert(mapping40, 0, 0)
@@ -102,6 +115,9 @@ def extract_labels(labels, splits, SEG40_DIR, SEG13_DIR, save_colored=True):
 
 
 def extract_depths(depths, splits, DEPTH_DIR, save_colored=False):
+    """
+    Extract depths from the dataset.
+    """
     depths = depths.transpose(0, 2, 1)
     if save_colored:
         os.makedirs('colored_depth', exist_ok=True)
@@ -121,16 +137,17 @@ def extract_depths(depths, splits, DEPTH_DIR, save_colored=False):
                 colored = plt.cm.jet(norm(depth))
                 plt.imsave('colored_depth/%05d.png' % (idx), colored)
 
-# def create_tgz(source_dir, output_filename):
-#     with tarfile.open(output_filename, "w:gz") as tar:
-#         tar.add(source_dir, arcname=os.path.basename(source_dir))
-
 def is_image_file(filename):
-    # Define common image file extensions
+    """
+    Check if a file is an image.
+    """
     image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff']
     return any(filename.lower().endswith(ext) for ext in image_extensions)
 
 def create_tar_from_images(directory, output_filename, num_classes):
+    """
+    Create a tarfile from images in a directory.
+    """
     # Open a tarfile for writing
     with tarfile.open(output_filename, "w:gz") as tar:
         # Iterate over all files in the directory
@@ -143,8 +160,21 @@ def create_tar_from_images(directory, output_filename, num_classes):
                     filename = filename[1:]
                 tar.add(filepath, arcname=f"new_nyu_class{num_classes}_{filename}")
 
+"""
+Run this script to re-create the labels stored at:
+    - test_labels_13
+    - train_labels_13
+    - test_labels_40
+    - train_labels_40
+Can use the following arguments when running the script:
+    --mat: path you would like to use to save the official dataset.
+    --normal_zip: path you would like to use to save the surface normal dataset.
+    --data_root: where all the downloaded and extracted data will be stored
+    --save_colored: wether to save colored labels and depth maps for visualization
+It's recommended to use the default values for the arguments, ie. run the script without any arguments.
+"""
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='RYU DATA Extraction')
+    parser = argparse.ArgumentParser(description='NYU DATA Extraction')
     parser.add_argument('--mat', type=str,
                         help='downloaded NYUv2 mat files. http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/nyu_depth_v2_labeled.mat',
                         default='nyu_depth_v2_labeled.mat')
@@ -175,25 +205,33 @@ if __name__ == '__main__':
     os.makedirs(SEG13_DIR, exist_ok=True)
     os.makedirs(DEPTH_DIR, exist_ok=True)
     import time
-    # with h5py.File(MAT_FILE, 'r') as fr:
-    #     images = fr["images"]
-    #     labels = fr["labels"]
-    #     depths = fr["depths"]
+    with h5py.File(MAT_FILE, 'r') as fr:
+        images = fr["images"]
+        labels = fr["labels"]
+        depths = fr["depths"]
 
-    #     extract_labels(np.array(labels), splits, SEG40_DIR, SEG13_DIR, save_colored=args.save_colored )
-    #     extract_depths(np.array(depths), splits, DEPTH_DIR, save_colored=args.save_colored)
-    #     extract_images(np.array(images), splits, IMAGE_DIR)
+        extract_labels(np.array(labels), splits, SEG40_DIR, SEG13_DIR, save_colored=args.save_colored )
+        extract_depths(np.array(depths), splits, DEPTH_DIR, save_colored=args.save_colored)
+        extract_images(np.array(images), splits, IMAGE_DIR)
 
-    #     if args.normal_zip is not None and os.path.exists(args.normal_zip):
-    #         NORMAL_DIR = os.path.join(DATA_ROOT, 'normal')
-    #         os.makedirs(NORMAL_DIR, exist_ok=True)
-    #         with zipfile.ZipFile(args.normal_zip, 'r') as normal_zip:
-    #             normal_zip.extractall(path=NORMAL_DIR)
+        if args.normal_zip is not None and os.path.exists(args.normal_zip):
+            NORMAL_DIR = os.path.join(DATA_ROOT, 'normal')
+            os.makedirs(NORMAL_DIR, exist_ok=True)
+            with zipfile.ZipFile(args.normal_zip, 'r') as normal_zip:
+                normal_zip.extractall(path=NORMAL_DIR)
         
-    #     if not os.path.exists(os.path.join( DATA_ROOT, 'splits.mat' )):
-    #         shutil.copy2( 'splits.mat', os.path.join( DATA_ROOT, 'splits.mat' ))
+        if not os.path.exists(os.path.join( DATA_ROOT, 'splits.mat' )):
+            shutil.copy2( 'splits.mat', os.path.join( DATA_ROOT, 'splits.mat' ))
     
-    # Create a tgz file
+    # Create a tgz files for 13 classes
+    if not os.path.exists('train_labels_13'):
+        os.makedirs('train_labels_13')
+    if not os.path.exists('test_labels_13'):
+        os.makedirs('test_labels_13')
+    create_tar_from_images('NYUv2/seg13/train', 'train_labels_13/nyuv2_train_class13.tgz', 13)
+    create_tar_from_images('NYUv2/seg13/test', 'test_labels_13/nyuv2_test_class13.tgz', 13)
+
+    # Create a tgz files for 40 classes
     if not os.path.exists('train_labels_40'):
         os.makedirs('train_labels_40')
     if not os.path.exists('test_labels_40'):
