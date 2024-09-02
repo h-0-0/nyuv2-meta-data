@@ -10,6 +10,7 @@ This repository contains everything needed to download and extract data for the 
 - Surface normals
 - 13 class segmentation labels
 - 40 class segmentation labels
+
 The surface normals are downloaded from [here](https://dl.fbaipublicfiles.com/fair_self_supervision_benchmark/nyuv2_surfacenormal_metadata.zip) and everything else from [here](https://cs.nyu.edu/~fergus/datasets/nyu_depth_v2.html)
 Additionally, you can avoid doing anything and simply download and use the pre-extracted segmentation labels found in:
 - test_labels_13
