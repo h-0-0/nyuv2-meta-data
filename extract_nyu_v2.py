@@ -76,11 +76,8 @@ def extract_labels(labels, splits, SEG40_DIR, SEG13_DIR, save_colored=True):
     labels = labels.transpose([0, 2, 1])
     labels_40 = mapping40[labels]
     labels_13 = mapping13[labels_40].astype('uint8')
-
-    labels_40 = labels_40.astype('uint8') - 1
-    labels_13 = labels_13.astype('uint8') - 1
-    #print( np.unique( labels_13 ) )
-
+    labels_40 = labels_40.astype('uint8') 
+    
     if save_colored:
         cmap = colormap()
         os.makedirs('colored_40', exist_ok=True)
